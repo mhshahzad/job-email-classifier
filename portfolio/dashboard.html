@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Email Classifier Evaluation</title>
+<style>
+body{font:16px/1.5 system-ui,sans-serif;color:#172033;background:#f4f7fb;margin:0}
+main{max-width:1180px;margin:auto;padding:32px 20px 60px}
+h1,h2{line-height:1.2} h1{font-size:2rem} h2{margin-top:32px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px}
+.card,section{background:#fff;border:1px solid #dce3ee;border-radius:12px;padding:18px}
+.value{font-size:1.8rem;font-weight:700;color:#1d4ed8}
+.charts{display:grid;grid-template-columns:repeat(auto-fit,minmax(400px,1fr));gap:16px}
+svg{width:100%;height:auto} .chart-title{font-weight:700;fill:#172033}
+.bar-label,.bar-score{font-size:12px;fill:#334155} .bar-track{fill:#e9eef6}
+.bar-value{fill:#2563eb} table{border-collapse:collapse;width:100%;font-size:.9rem}
+th,td{border:1px solid #dce3ee;padding:8px;text-align:center} th{background:#f8fafc}
+.note{border-left:4px solid #f59e0b;padding:10px 14px;background:#fffbeb}
+footer{margin-top:28px;color:#526174;font-size:.9rem}
+@media(max-width:600px){.charts{display:block} .charts section{margin-bottom:14px}}
+</style>
+</head>
+<body><main>
+<h1>Email classification evaluation</h1>
+<p>Fixed held-out test split · local evaluation · aggregate metrics only</p>
+<div class="cards">
+<section><div>Fine-tuned DistilBERT accuracy</div><div class="value">96.2%</div></section>
+<section><div>Macro-F1</div><div class="value">0.844</div></section>
+<section><div>Test examples</div><div class="value">973</div></section>
+<section><div>Offer support</div><div class="value">2</div></section>
+</div>
+<h2>Model comparison</h2>
+<div class="charts">
+<section><svg viewBox="0 0 720 366" role="img" aria-label="Accuracy">
+<text x="0" y="24" class="chart-title">Accuracy</text>
+<text x="0" y="61" class="bar-label">Fine-tuned DistilBERT</text>
+<rect x="230" y="44" width="425" height="24" rx="4" class="bar-track"/>
+<rect x="230" y="44" width="408.8" height="24" rx="4" class="bar-value"/>
+<text x="665" y="61" class="bar-score">0.962</text>
+<text x="0" y="103" class="bar-label">TF-IDF + Complement Naive Bayes</text>
+<rect x="230" y="86" width="425" height="24" rx="4" class="bar-track"/>
+<rect x="230" y="86" width="382.6" height="24" rx="4" class="bar-value"/>
+<text x="665" y="103" class="bar-score">0.900</text>
+<text x="0" y="145" class="bar-label">TF-IDF + Linear SVM</text>
+<rect x="230" y="128" width="425" height="24" rx="4" class="bar-track"/>
+<rect x="230" y="128" width="407.5" height="24" rx="4" class="bar-value"/>
+<text x="665" y="145" class="bar-score">0.959</text>
+<text x="0" y="187" class="bar-label">Fine-tuned BERT-base</text>
+<rect x="230" y="170" width="425" height="24" rx="4" class="bar-track"/>
+<rect x="230" y="170" width="409.3" height="24" rx="4" class="bar-value"/>
+<text x="665" y="187" class="bar-score">0.963</text>
+<text x="0" y="229" class="bar-label">llama3.2:latest</text>
+<rect x="230" y="212" width="425" height="24" rx="4" class="bar-track"/>
+<rect x="230" y="212" width="385.3" height="24" rx="4" class="bar-value"/>
+<text x="665" y="229" class="bar-score">0.906</text>
+<text x="0" y="271" class="bar-label">qwen3.5:9b</text>
+<rect x="230" y="254" width="425" height="24" rx="4" class="bar-track"/>
+<rect x="230" y="254" width="387.0" height="24" rx="4" class="bar-value"/>
+<text x="665" y="271" class="bar-score">0.911</text>
+<text x="0" y="313" class="bar-label">TF-IDF + Logistic Regression</text>
+<rect x="230" y="296" width="425" height="24" rx="4" class="bar-track"/>
+<rect x="230" y="296" width="402.3" height="24" rx="4" class="bar-value"/>
+<text x="665" y="313" class="bar-score">0.947</text>
+</svg></section>
+<section><svg viewBox="0 0 720 366" role="img" aria-label="Macro-F1">
+<text x="0" y="24" class="chart-title">Macro-F1</text>
+<text x="0" y="61" class="bar-label">Fine-tuned DistilBERT</text>
+<rect x="230" y="44" width="425" height="24" rx="4" class="bar-track"/>
+<rect x="230" y="44" width="358.9" height="24" rx="4" class="bar-value"/>
+<text x="665" y="61" class="bar-score">0.844</text>
+<text x="0" y="103" class="bar-label">TF-IDF + Complement Naive Bayes</text>
+<rect x="230" y="86" width="425" height="24" rx="4" class="bar-track"/>
+<rect x="230" y="86" width="216.0" height="24" rx="4" class="bar-value"/>
+<text x="665" y="103" class="bar-score">0.508</text>
+<text x="0" y="145" class="bar-label">TF-IDF + Linear SVM</text>
+<rect x="230" y="128" width="425" height="24" rx="4" class="bar-track"/>
+<rect x="230" y="128" width="339.5" height="24" rx="4" class="bar-value"/>
+<text x="665" y="145" class="bar-score">0.799</text>
+<text x="0" y="187" class="bar-label">Fine-tuned BERT-base</text>
+<rect x="230" y="170" width="425" height="24" rx="4" class="bar-track"/>
+<rect x="230" y="170" width="364.9" height="24" rx="4" class="bar-value"/>
+<text x="665" y="187" class="bar-score">0.859</text>
+<text x="0" y="229" class="bar-label">llama3.2:latest</text>
+<rect x="230" y="212" width="425" height="24" rx="4" class="bar-track"/>
+<rect x="230" y="212" width="249.4" height="24" rx="4" class="bar-value"/>
+<text x="665" y="229" class="bar-score">0.587</text>
+<text x="0" y="271" class="bar-label">qwen3.5:9b</text>
+<rect x="230" y="254" width="425" height="24" rx="4" class="bar-track"/>
+<rect x="230" y="254" width="337.0" height="24" rx="4" class="bar-value"/>
+<text x="665" y="271" class="bar-score">0.793</text>
+<text x="0" y="313" class="bar-label">TF-IDF + Logistic Regression</text>
+<rect x="230" y="296" width="425" height="24" rx="4" class="bar-track"/>
+<rect x="230" y="296" width="342.9" height="24" rx="4" class="bar-value"/>
+<text x="665" y="313" class="bar-score">0.807</text>
+</svg></section>
+<section><svg viewBox="0 0 720 366" role="img" aria-label="Inference latency (ms/email; lower is better)">
+<text x="0" y="24" class="chart-title">Inference latency (ms/email; lower is better)</text>
+<text x="0" y="61" class="bar-label">Fine-tuned DistilBERT</text>
+<rect x="230" y="44" width="425" height="24" rx="4" class="bar-track"/>
+<rect x="230" y="44" width="0.0" height="24" rx="4" class="bar-value"/>
+<text x="665" y="61" class="bar-score">—</text>
+<text x="0" y="103" class="bar-label">TF-IDF + Complement Naive Bayes</text>
+<rect x="230" y="86" width="425" height="24" rx="4" class="bar-track"/>
+<rect x="230" y="86" width="0.3" height="24" rx="4" class="bar-value"/>
+<text x="665" y="103" class="bar-score">1.07 ms</text>
+<text x="0" y="145" class="bar-label">TF-IDF + Linear SVM</text>
+<rect x="230" y="128" width="425" height="24" rx="4" class="bar-track"/>
+<rect x="230" y="128" width="0.2" height="24" rx="4" class="bar-value"/>
+<text x="665" y="145" class="bar-score">0.62 ms</text>
+<text x="0" y="187" class="bar-label">Fine-tuned BERT-base</text>
+<rect x="230" y="170" width="425" height="24" rx="4" class="bar-track"/>
+<rect x="230" y="170" width="1.3" height="24" rx="4" class="bar-value"/>
+<text x="665" y="187" class="bar-score">4.74 ms</text>
+<text x="0" y="229" class="bar-label">llama3.2:latest</text>
+<rect x="230" y="212" width="425" height="24" rx="4" class="bar-track"/>
+<rect x="230" y="212" width="194.4" height="24" rx="4" class="bar-value"/>
+<text x="665" y="229" class="bar-score">1080.06 ms</text>
+<text x="0" y="271" class="bar-label">qwen3.5:9b</text>
+<rect x="230" y="254" width="425" height="24" rx="4" class="bar-track"/>
+<rect x="230" y="254" width="425.0" height="24" rx="4" class="bar-value"/>
+<text x="665" y="271" class="bar-score">3957.96 ms</text>
+<text x="0" y="313" class="bar-label">TF-IDF + Logistic Regression</text>
+<rect x="230" y="296" width="425" height="24" rx="4" class="bar-track"/>
+<rect x="230" y="296" width="0.1" height="24" rx="4" class="bar-value"/>
+<text x="665" y="313" class="bar-score">0.45 ms</text>
+</svg></section>
+</div>
+<h2>Fine-tuned DistilBERT confusion matrix</h2>
+<section><table><thead><tr><th>Actual \ Predicted</th><th>application_confirmation</th><th>assessment</th><th>interview_invitation</th><th>offer</th><th>rejection</th></tr></thead><tbody><tr><th scope="row">application_confirmation</th><td style="background:rgba(37, 99, 235, 0.850);color:#fff" title="Actual application_confirmation, predicted application_confirmation">570</td><td style="background:rgba(37, 99, 235, 0.100);color:#1f2937" title="Actual application_confirmation, predicted assessment">0</td><td style="background:rgba(37, 99, 235, 0.100);color:#1f2937" title="Actual application_confirmation, predicted interview_invitation">0</td><td style="background:rgba(37, 99, 235, 0.100);color:#1f2937" title="Actual application_confirmation, predicted offer">0</td><td style="background:rgba(37, 99, 235, 0.109);color:#1f2937" title="Actual application_confirmation, predicted rejection">7</td></tr><tr><th scope="row">assessment</th><td style="background:rgba(37, 99, 235, 0.104);color:#1f2937" title="Actual assessment, predicted application_confirmation">3</td><td style="background:rgba(37, 99, 235, 0.112);color:#1f2937" title="Actual assessment, predicted assessment">9</td><td style="background:rgba(37, 99, 235, 0.101);color:#1f2937" title="Actual assessment, predicted interview_invitation">1</td><td style="background:rgba(37, 99, 235, 0.100);color:#1f2937" title="Actual assessment, predicted offer">0</td><td style="background:rgba(37, 99, 235, 0.100);color:#1f2937" title="Actual assessment, predicted rejection">0</td></tr><tr><th scope="row">interview_invitation</th><td style="background:rgba(37, 99, 235, 0.107);color:#1f2937" title="Actual interview_invitation, predicted application_confirmation">5</td><td style="background:rgba(37, 99, 235, 0.101);color:#1f2937" title="Actual interview_invitation, predicted assessment">1</td><td style="background:rgba(37, 99, 235, 0.153);color:#1f2937" title="Actual interview_invitation, predicted interview_invitation">40</td><td style="background:rgba(37, 99, 235, 0.100);color:#1f2937" title="Actual interview_invitation, predicted offer">0</td><td style="background:rgba(37, 99, 235, 0.103);color:#1f2937" title="Actual interview_invitation, predicted rejection">2</td></tr><tr><th scope="row">offer</th><td style="background:rgba(37, 99, 235, 0.101);color:#1f2937" title="Actual offer, predicted application_confirmation">1</td><td style="background:rgba(37, 99, 235, 0.100);color:#1f2937" title="Actual offer, predicted assessment">0</td><td style="background:rgba(37, 99, 235, 0.100);color:#1f2937" title="Actual offer, predicted interview_invitation">0</td><td style="background:rgba(37, 99, 235, 0.101);color:#1f2937" title="Actual offer, predicted offer">1</td><td style="background:rgba(37, 99, 235, 0.100);color:#1f2937" title="Actual offer, predicted rejection">0</td></tr><tr><th scope="row">rejection</th><td style="background:rgba(37, 99, 235, 0.117);color:#1f2937" title="Actual rejection, predicted application_confirmation">13</td><td style="background:rgba(37, 99, 235, 0.101);color:#1f2937" title="Actual rejection, predicted assessment">1</td><td style="background:rgba(37, 99, 235, 0.104);color:#1f2937" title="Actual rejection, predicted interview_invitation">3</td><td style="background:rgba(37, 99, 235, 0.100);color:#1f2937" title="Actual rejection, predicted offer">0</td><td style="background:rgba(37, 99, 235, 0.516);color:#1f2937" title="Actual rejection, predicted rejection">316</td></tr></tbody></table></section>
+<h2>Evaluation caveat</h2>
+<p class="note">The held-out test split contains only 2 offer examples.
+Per-class offer metrics are therefore highly uncertain. This dataset has no separately
+adjudicated golden set, and conversation-level leakage cannot be ruled out because thread
+IDs were unavailable.</p>
+<footer>Generated locally from aggregate evaluation artifacts. No email text is embedded in this dashboard.</footer>
+</main></body></html>

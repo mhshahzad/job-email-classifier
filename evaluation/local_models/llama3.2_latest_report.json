@@ -1,0 +1,49 @@
+{
+  "application_confirmation": {
+    "precision": 0.9742647058823529,
+    "recall": 0.9185441941074524,
+    "f1-score": 0.9455842997323818,
+    "support": 577.0
+  },
+  "assessment": {
+    "precision": 0.24324324324324326,
+    "recall": 0.6923076923076923,
+    "f1-score": 0.36,
+    "support": 13.0
+  },
+  "interview_invitation": {
+    "precision": 0.9444444444444444,
+    "recall": 0.3541666666666667,
+    "f1-score": 0.5151515151515151,
+    "support": 48.0
+  },
+  "offer": {
+    "precision": 0.1111111111111111,
+    "recall": 0.5,
+    "f1-score": 0.18181818181818182,
+    "support": 2.0
+  },
+  "rejection": {
+    "precision": 0.8904109589041096,
+    "recall": 0.975975975975976,
+    "f1-score": 0.9312320916905444,
+    "support": 333.0
+  },
+  "accuracy": 0.9064748201438849,
+  "macro avg": {
+    "precision": 0.6326948927170524,
+    "recall": 0.6881989058115574,
+    "f1-score": 0.5867572176785246,
+    "support": 973.0
+  },
+  "weighted avg": {
+    "precision": 0.9325542675507749,
+    "recall": 0.9064748201438849,
+    "f1-score": 0.9100445391258424,
+    "support": 973.0
+  },
+  "model": "llama3.2:latest",
+  "evaluated_examples": 973,
+  "mean_latency_seconds": 1.0800626927029806,
+  "is_full_test_set": true
+}

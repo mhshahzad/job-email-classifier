@@ -1,0 +1,20 @@
+[project]
+name = "emails"
+version = "0.1.0"
+description = "Compare transformer and classical NLP models for job email classification"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "accelerate>=1.15.0",
+    "datasets>=5.1.0",
+    "evaluate>=0.4.6",
+    "huggingface-hub>=2.4.0",
+    "matplotlib>=3.11.2",
+    "numpy>=2.5.4",
+    "pandas>=3.1.1",
+    "python-dotenv>=1.2.4",
+    "scikit-learn>=1.9.1",
+    "torch>=2.15.0",
+    "tqdm>=4.70.1",
+    "transformers>=5.22.2",
+]

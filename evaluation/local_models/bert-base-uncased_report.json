@@ -1,0 +1,52 @@
+{
+  "application_confirmation": {
+    "precision": 0.98,
+    "recall": 0.97,
+    "f1-score": 0.98,
+    "support": 577.0
+  },
+  "assessment": {
+    "precision": 1.0,
+    "recall": 0.69,
+    "f1-score": 0.82,
+    "support": 13.0
+  },
+  "interview_invitation": {
+    "precision": 0.89,
+    "recall": 0.85,
+    "f1-score": 0.87,
+    "support": 48.0
+  },
+  "offer": {
+    "precision": 1.0,
+    "recall": 0.5,
+    "f1-score": 0.67,
+    "support": 2.0
+  },
+  "rejection": {
+    "precision": 0.94,
+    "recall": 0.98,
+    "f1-score": 0.96,
+    "support": 333.0
+  },
+  "accuracy": 0.963,
+  "macro avg": {
+    "precision": 0.8,
+    "recall": 0.8,
+    "f1-score": 0.8586,
+    "support": 973.0
+  },
+  "weighted avg": {
+    "precision": 0.96,
+    "recall": 0.96,
+    "f1-score": 0.96,
+    "support": 973.0
+  },
+  "model": "Fine-tuned BERT-base",
+  "evaluated_examples": 973,
+  "mean_latency_seconds": 0.00474,
+  "latency_method": "Reported batched Transformers Trainer prediction time divided by examples; Colab GPU model not provided",
+  "is_full_test_set": true,
+  "source_precision": "Per-class and weighted metrics copied at the displayed precision from the provided console output.",
+  "validation_note": "The run output included missing/unexpected BERT LayerNorm key warnings during checkpoint loading; verify checkpoint weights before treating this result as a fully validated benchmark."
+}

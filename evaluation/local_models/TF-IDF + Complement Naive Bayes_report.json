@@ -1,0 +1,50 @@
+{
+  "application_confirmation": {
+    "precision": 0.8904991948470209,
+    "recall": 0.9584055459272097,
+    "f1-score": 0.9232053422370617,
+    "support": 577.0
+  },
+  "assessment": {
+    "precision": 0.5,
+    "recall": 0.07692307692307693,
+    "f1-score": 0.13333333333333333,
+    "support": 13.0
+  },
+  "interview_invitation": {
+    "precision": 0.9090909090909091,
+    "recall": 0.4166666666666667,
+    "f1-score": 0.5714285714285714,
+    "support": 48.0
+  },
+  "offer": {
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1-score": 0.0,
+    "support": 2.0
+  },
+  "rejection": {
+    "precision": 0.9207317073170732,
+    "recall": 0.9069069069069069,
+    "f1-score": 0.913767019667171,
+    "support": 333.0
+  },
+  "accuracy": 0.9003083247687564,
+  "macro avg": {
+    "precision": 0.6440643622510007,
+    "recall": 0.4717804392847721,
+    "f1-score": 0.5083468533332275,
+    "support": 973.0
+  },
+  "weighted avg": {
+    "precision": 0.8947153726615417,
+    "recall": 0.9003083247687564,
+    "f1-score": 0.8901704057367495,
+    "support": 973.0
+  },
+  "model": "TF-IDF + Complement Naive Bayes",
+  "evaluated_examples": 973,
+  "mean_latency_seconds": 0.001074673087363948,
+  "latency_method": "Single-email TF-IDF transform plus prediction",
+  "is_full_test_set": true
+}

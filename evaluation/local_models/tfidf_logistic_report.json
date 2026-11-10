@@ -1,0 +1,61 @@
+{
+  "application_confirmation": {
+    "precision": 0.9749552772808586,
+    "recall": 0.9445407279029463,
+    "f1-score": 0.9595070422535211,
+    "support": 577.0
+  },
+  "assessment": {
+    "precision": 0.8888888888888888,
+    "recall": 0.6153846153846154,
+    "f1-score": 0.7272727272727273,
+    "support": 13.0
+  },
+  "interview_invitation": {
+    "precision": 0.8979591836734694,
+    "recall": 0.9166666666666666,
+    "f1-score": 0.9072164948453608,
+    "support": 48.0
+  },
+  "offer": {
+    "precision": 0.5,
+    "recall": 0.5,
+    "f1-score": 0.5,
+    "support": 2.0
+  },
+  "rejection": {
+    "precision": 0.9124293785310734,
+    "recall": 0.96996996996997,
+    "f1-score": 0.9403202328966521,
+    "support": 333.0
+  },
+  "accuracy": 0.94655704008222,
+  "macro avg": {
+    "precision": 0.8348465456748582,
+    "recall": 0.7893123959848396,
+    "f1-score": 0.8068632994536523,
+    "support": 973.0
+  },
+  "weighted avg": {
+    "precision": 0.947631833929892,
+    "recall": 0.94655704008222,
+    "f1-score": 0.9463136054902258,
+    "support": 973.0
+  },
+  "model": "TF-IDF + Logistic Regression",
+  "evaluated_examples": 973,
+  "is_full_test_set": true,
+  "mean_latency_seconds": 0.00044770482940946173,
+  "latency_method": "Single-email TF-IDF transform plus prediction",
+  "configuration": {
+    "ngram_range": [
+      1,
+      2
+    ],
+    "min_df": 2,
+    "max_features": 100000,
+    "sublinear_tf": true,
+    "class_weight": "balanced",
+    "max_iter": 1000
+  }
+}

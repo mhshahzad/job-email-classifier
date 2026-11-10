@@ -1,0 +1,50 @@
+{
+  "application_confirmation": {
+    "precision": 0.9771929824561404,
+    "recall": 0.9653379549393414,
+    "f1-score": 0.9712292938099389,
+    "support": 577.0
+  },
+  "assessment": {
+    "precision": 0.875,
+    "recall": 0.5384615384615384,
+    "f1-score": 0.6666666666666666,
+    "support": 13.0
+  },
+  "interview_invitation": {
+    "precision": 0.88,
+    "recall": 0.9166666666666666,
+    "f1-score": 0.8979591836734694,
+    "support": 48.0
+  },
+  "offer": {
+    "precision": 0.5,
+    "recall": 0.5,
+    "f1-score": 0.5,
+    "support": 2.0
+  },
+  "rejection": {
+    "precision": 0.9446064139941691,
+    "recall": 0.972972972972973,
+    "f1-score": 0.9585798816568047,
+    "support": 333.0
+  },
+  "accuracy": 0.9588900308324769,
+  "macro avg": {
+    "precision": 0.835359879290062,
+    "recall": 0.778687826608104,
+    "f1-score": 0.798887005161376,
+    "support": 973.0
+  },
+  "weighted avg": {
+    "precision": 0.9588995752695286,
+    "recall": 0.9588900308324769,
+    "f1-score": 0.9582478012364274,
+    "support": 973.0
+  },
+  "model": "TF-IDF + Linear SVM",
+  "evaluated_examples": 973,
+  "mean_latency_seconds": 0.0006156810955939362,
+  "latency_method": "Single-email TF-IDF transform plus prediction",
+  "is_full_test_set": true
+}
