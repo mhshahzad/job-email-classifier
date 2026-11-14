@@ -43,6 +43,7 @@ portfolio/blog_artifacts/*
 !portfolio/blog_artifacts/model_accuracy.png
 !portfolio/blog_artifacts/model_macro_f1.png
 !portfolio/blog_artifacts/model_comparison_latest.png
+!portfolio/blog_artifacts/distilbert_per_class_f1_versions.png
 
 # Local scaffolding and private dataset publishing helper
 main.py
