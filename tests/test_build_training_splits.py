@@ -1,10 +1,15 @@
+from contextlib import redirect_stdout
+from io import StringIO
 import tempfile
 import unittest
 from pathlib import Path
 
 from build_training_splits import (
-    generate_synthetic_offers,
+    analyze_splits,
+    clean_records,
     load_records,
+    load_synthetic_records,
+    load_synthetic_training_records,
     split_grouped_records,
 )
 
@@ -44,17 +49,103 @@ class BuildTrainingSplitsTests(unittest.TestCase):
             split_grouped_records(records, seed=7),
         )
 
-    def test_synthetic_offers_are_deterministic_and_labeled(self):
-        first = generate_synthetic_offers(5, seed=19)
-        second = generate_synthetic_offers(5, seed=19)
+    def test_clean_records_removes_normalized_duplicates_and_conflicts(self):
+        records = [
+            {"subject": "Interview", "body": "You are invited.", "label": "interview"},
+            {"subject": " INTERVIEW ", "body": "you are invited. ", "label": "interview"},
+            {"subject": "Offer", "body": "Please review.", "label": "offer"},
+            {"subject": " offer ", "body": "please review. ", "label": "rejection"},
+            {"subject": "Assessment", "body": "Complete the test.", "label": "assessment"},
+        ]
 
-        self.assertEqual(first, second)
-        self.assertEqual(len(first), 5)
-        self.assertTrue(all(record["label"] == "offer" for record in first))
+        cleaned, removed_count, conflicting_groups = clean_records(records)
+
         self.assertEqual(
-            len({(record["subject"], record["body"]) for record in first}),
-            5,
+            cleaned,
+            [
+                {"subject": "Interview", "body": "You are invited.", "label": "interview"},
+                {"subject": "Assessment", "body": "Complete the test.", "label": "assessment"},
+            ],
         )
+        self.assertEqual(removed_count, 3)
+        self.assertEqual(conflicting_groups, 1)
+
+    def test_analysis_reports_splits_and_writes_aggregate_plot(self):
+        splits = {
+            "train": [
+                {"subject": "Offer", "body": "Review your offer.", "label": "offer"},
+                {"subject": "Thanks", "body": "Application received.", "label": "confirmation"},
+            ],
+            "validation": [
+                {"subject": "Assessment", "body": "Complete the test.", "label": "assessment"},
+            ],
+            "test": [
+                {"subject": "Interview", "body": "Choose a time.", "label": "interview"},
+            ],
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            plot_file = Path(directory) / "analysis.png"
+            output = StringIO()
+            with redirect_stdout(output):
+                analyze_splits(splits, plot_file)
+
+            self.assertTrue(plot_file.is_file())
+            self.assertIn("Train records: 2", output.getvalue())
+            self.assertIn("Label distribution:", output.getvalue())
+            self.assertIn("Duplicate subject/body records: 0", output.getvalue())
+
+    def test_load_synthetic_records_checks_expected_label(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "synthetic.jsonl"
+            path.write_text(
+                '{"subject":"Offer","body":"Please review the offer.","label":"offer"}\n',
+                encoding="utf-8",
+            )
+
+            records = load_synthetic_records(path, "offer")
+
+            self.assertEqual(len(records), 1)
+            self.assertEqual(records[0]["label"], "offer")
+
+    def test_load_synthetic_records_rejects_unexpected_label(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "synthetic.jsonl"
+            path.write_text(
+                '{"subject":"Offer","body":"Please review the offer.","label":"assessment"}\n',
+                encoding="utf-8",
+            )
+
+            with self.assertRaisesRegex(ValueError, "must all have label"):
+                load_synthetic_records(path, "offer")
+
+    def test_prebuilt_offer_files_and_assessments_are_combined_for_training(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            original_offers = root / "synthetic_offers.jsonl"
+            scenario_offers = root / "synthetic_offer_scenarios.jsonl"
+            assessments = root / "synthetic_assessments.jsonl"
+            original_offers.write_text(
+                '{"subject":"Offer A","body":"Original offer.","label":"offer"}\n',
+                encoding="utf-8",
+            )
+            scenario_offers.write_text(
+                '{"subject":"Offer B","body":"Scenario offer.","label":"offer"}\n',
+                encoding="utf-8",
+            )
+            assessments.write_text(
+                '{"subject":"Assessment","body":"Complete the task.","label":"assessment"}\n',
+                encoding="utf-8",
+            )
+
+            synthetic, offer_count, assessment_count = load_synthetic_training_records(
+                [],
+                (original_offers, scenario_offers),
+                assessments,
+            )
+
+            self.assertEqual(offer_count, 2)
+            self.assertEqual(assessment_count, 1)
+            self.assertEqual([record["label"] for record in synthetic], ["offer", "offer", "assessment"])
 
     def test_load_records_rejects_missing_required_fields(self):
         with tempfile.TemporaryDirectory() as directory:

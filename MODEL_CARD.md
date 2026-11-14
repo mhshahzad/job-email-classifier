@@ -19,22 +19,52 @@ basis for an employment-related decision.
 
 ## Evaluation
 
-Models use a fixed held-out test split of 973 examples. Checkpoints for
-trainable models are selected using validation macro-F1. Reported
-fine-tuned results:
+The latest reported DistilBERT experiment (v3) used the email subject and
+body together, with a maximum sequence length of 256, learning rate of
+`2e-5`, seed 42, and eight configured epochs. Its checkpoint was selected
+using validation macro-F1. The v3 evaluation covers 973 examples:
 
-| Model | Accuracy | Macro-F1 |
-|---|---:|---:|
-| BERT-base | 0.963 | 0.8586 |
-| DistilBERT | 0.962 | 0.844 |
+| Metric | DistilBERT v3 |
+|---|---:|
+| Accuracy | 0.9681 |
+| Macro-F1 | 0.8673 |
+| Weighted-F1 | 0.9677 |
+| Validation macro-F1 | 0.8580 |
+| Mean latency | 1.90 ms/email |
+
+Per-class v3 test results:
+
+| Category | Precision | Recall | F1-score | Support |
+|---|---:|---:|---:|---:|
+| Application confirmation | 0.9726 | 0.9844 | 0.9785 | 577 |
+| Assessment | 0.9091 | 0.7692 | 0.8333 | 13 |
+| Interview invitation | 0.9318 | 0.8542 | 0.8913 | 48 |
+| Offer | 1.0000 | 0.5000 | 0.6667 | 2 |
+| Rejection | 0.9670 | 0.9670 | 0.9670 | 333 |
+
+Earlier reported experiments provide context:
+
+| Experiment | Input | Accuracy | Macro-F1 | Weighted-F1 |
+|---|---|---:|---:|---:|
+| DistilBERT v1 | Body only | 0.9620 | 0.8444 | 0.9613 |
+| DistilBERT v2-2, expanded synthetic training data | Subject + body | 0.9496 | 0.7094 | 0.9489 |
+| DistilBERT v3, latest | Subject + body | 0.9681 | 0.8673 | 0.9677 |
+| BERT-base, original benchmark | — | 0.9630 | 0.8586 | 0.9600 |
+
+V2-2 added synthetic offer and assessment examples to training. V3 used the
+earlier training sample with subject and body together. The v2-2 and v3
+reports reference different dataset repositories/revisions. Their results
+are experiment snapshots, not a controlled, paired test of synthetic-data
+augmentation or input representation. The earlier BERT-base run emitted
+missing/unexpected LayerNorm-key warnings during checkpoint loading, so its
+reported score remains provisional. See the [evaluation dashboard](portfolio/dashboard.html)
+for aggregate comparisons and the v3 confusion matrix.
 
 These are single-run results, not a multi-seed benchmark. The test set
-contains only two offer examples, making that class's metrics highly
-uncertain. Labels are not independently adjudicated. Conversation-level
-separation cannot be confirmed because thread identifiers were unavailable.
-The BERT-base run emitted missing/unexpected LayerNorm-key warnings during
-checkpoint loading; its weights should be verified before relying on its
-reported score.
+contains only two offer examples and 13 assessment examples, making those
+class metrics highly uncertain. Labels are not independently adjudicated.
+Conversation-level separation cannot be confirmed because thread identifiers
+were unavailable.
 
 ## Limitations and risks
 

@@ -4,6 +4,7 @@
 import torch
 import torch.nn.functional as F
 
+from email_inference import format_classification, format_email_text
 from transformers import (
     AutoTokenizer,
     AutoModelForSequenceClassification
@@ -27,10 +28,7 @@ model.eval()
 
 def classify_email(subject, body):
 
-    text = (
-        f"Subject: {subject}\n"
-        f"Email: {body}"
-    )
+    text = format_email_text(subject, body)
 
     inputs = tokenizer(
         text,
@@ -53,28 +51,10 @@ def classify_email(subject, body):
             dim=-1
         )[0]
 
-    predicted_id = int(
-        torch.argmax(probabilities)
+    return format_classification(
+        probabilities.tolist(),
+        model.config.id2label,
     )
-
-    predicted_label = model.config.id2label[
-        predicted_id
-    ]
-
-    scores = {
-        model.config.id2label[i]: round(
-            float(probabilities[i]), 4
-        )
-        for i in range(len(probabilities))
-    }
-
-    return {
-        "predicted_category": predicted_label,
-        "confidence": round(
-            float(probabilities[predicted_id]), 4
-        ),
-        "all_scores": scores
-    }
 
 
 if __name__ == "__main__":

@@ -1,0 +1,4 @@
+**
+!Dockerfile
+!email_inference.py
+!serve.py

@@ -1,0 +1,54 @@
+# Python-generated files
+__pycache__/
+.ipynb_checkpoints/
+*.ipynb
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Secrets and private email data
+.env
+.env.*
+!.env.example
+.DS_Store
+email_dataset/
+training_dataset/
+
+# Local model weights, checkpoints, and row-level evaluation data
+models/
+evaluation/test_predictions.csv
+evaluation/*predictions*
+evaluation/local_models/*_predictions.jsonl
+
+# Keep aggregate evaluation outputs; omit local row-level artifacts
+evaluation/*
+!evaluation/model_comparison.json
+!evaluation/classification_report.json
+!evaluation/confusion_matrix.csv
+!evaluation/local_models/
+evaluation/local_models/*
+!evaluation/local_models/*_report.json
+!evaluation/local_models/*_confusion_matrix.csv
+
+# Recruiter-facing dashboard assets only
+portfolio/*.md
+portfolio/upload_blog_images.py
+portfolio/blog_artifacts/*
+!portfolio/blog_artifacts/dashboard.png
+!portfolio/blog_artifacts/model_accuracy.png
+!portfolio/blog_artifacts/model_macro_f1.png
+!portfolio/blog_artifacts/model_comparison_latest.png
+
+# Local scaffolding and private dataset publishing helper
+main.py
+upload_to_hf.py
+
+# Personal-use artifact generation
+build_portfolio.py
+generate_blog_artifacts.py
+portfolio/update_distilbert_results.py

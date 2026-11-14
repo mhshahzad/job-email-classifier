@@ -1,14 +1,25 @@
-import argparse
 import json
 import random
 from collections import Counter, defaultdict
 from pathlib import Path
 
+import matplotlib
+import pandas as pd
+
+matplotlib.use("Agg")
+
+import matplotlib.pyplot as plt
+
 
 ROOT = Path(__file__).parent
 SOURCE_FILE = ROOT / "email_dataset" / "hf_upload.jsonl"
 OUTPUT_DIR = ROOT / "training_dataset"
-SYNTHETIC_FILE = OUTPUT_DIR / "synthetic_offers.jsonl"
+ANALYSIS_PLOT = OUTPUT_DIR / "dataset_splits_analysis.png"
+SYNTHETIC_OFFER_FILES = (
+    OUTPUT_DIR / "synthetic_offers.jsonl",
+    OUTPUT_DIR / "synthetic_offer_scenarios.jsonl",
+)
+SYNTHETIC_ASSESSMENT_FILE = OUTPUT_DIR / "synthetic_assessments.jsonl"
 SPLIT_FILES = {
     "train": OUTPUT_DIR / "train.jsonl",
     "validation": OUTPUT_DIR / "validation.jsonl",
@@ -16,52 +27,6 @@ SPLIT_FILES = {
 }
 SPLIT_RATIOS = {"train": 0.70, "validation": 0.15, "test": 0.15}
 RANDOM_SEED = 42
-
-SUBJECTS = (
-    "Offer of Employment for [ROLE]",
-    "Your [ROLE] Offer from [COMPANY]",
-    "Formal Offer: [ROLE] Position",
-    "Next Steps: [ROLE] Offer",
-    "Employment Offer and Details",
-)
-OPENINGS = (
-    "We are pleased to offer you the [ROLE] position at [COMPANY].",
-    "Following our conversations, [COMPANY] would like to offer you the [ROLE] role.",
-    "We are delighted to extend an offer for you to join us as [ROLE].",
-    "This email confirms our offer for the [ROLE] position with [COMPANY].",
-    "The team enjoyed meeting you, and we would like to offer you the [ROLE] position.",
-    "We would be excited to have you join [COMPANY] as [ROLE]. Please review our offer below.",
-    "Your interviews are complete, and we are ready to make you an offer for [ROLE].",
-    "On behalf of [COMPANY], I am happy to present our offer for the [ROLE] role.",
-    "We are moving forward with an offer for you to join [COMPANY] as [ROLE].",
-    "It is my pleasure to share the details of our offer for the [ROLE] position.",
-)
-DETAILS = (
-    "The position is full-time and remote, with a proposed start date to be agreed together.",
-    "The role is based in [LOCATION], and the expected start date is flexible by mutual agreement.",
-    "The annual base salary is [SALARY], with benefits described in the attached offer letter.",
-    "This offer includes [BENEFITS]; the complete terms are listed in the attached document.",
-    "The position is full-time, reporting to [MANAGER], with compensation detailed in the offer letter.",
-    "We have included the proposed compensation, benefits, and employment terms in the attached letter.",
-    "The role is [WORK ARRANGEMENT], and the compensation package is outlined in the attached document.",
-    "Your proposed start date is [START_DATE], subject to your confirmation and completion of onboarding.",
-    "The offer is contingent on the standard pre-employment checks described in the attached terms.",
-    "Please review the attached document for salary, benefits, and other terms of employment.",
-)
-NEXT_STEPS = (
-    "Please review the attached letter and let us know your decision by [RESPONSE_DATE].",
-    "If you would like to accept, reply to this message and we will send the agreement for signature.",
-    "You can discuss any part of the offer with me before the response date of [RESPONSE_DATE].",
-    "Please let us know if you have questions or would like to discuss any of the terms.",
-    "To accept, sign and return the offer document by [RESPONSE_DATE].",
-)
-SIGNOFFS = (
-    "Best regards,\n[RECRUITER]\n[COMPANY] Talent Team",
-    "Kind regards,\n[HIRING_MANAGER]\n[COMPANY]",
-    "Sincerely,\n[RECRUITER]\nPeople Operations",
-    "Thank you,\n[HIRING_MANAGER]\n[COMPANY] Recruiting",
-    "Warm regards,\n[RECRUITER]\nTalent Acquisition",
-)
 
 
 def load_records(path: Path) -> list[dict[str, str]]:
@@ -93,6 +58,32 @@ def load_records(path: Path) -> list[dict[str, str]]:
 
 def text_key(record: dict[str, str]) -> tuple[str, str]:
     return record["subject"].strip().casefold(), record["body"].strip().casefold()
+
+
+def clean_records(
+    records: list[dict[str, str]],
+) -> tuple[list[dict[str, str]], int, int]:
+    grouped: dict[tuple[str, str], list[dict[str, str]]] = defaultdict(list)
+    for record in records:
+        grouped[text_key(record)].append(record)
+
+    conflicting_groups = {
+        key
+        for key, group in grouped.items()
+        if len({record["label"] for record in group}) > 1
+    }
+
+    cleaned = []
+    seen = set()
+    for record in records:
+        key = text_key(record)
+        if key in conflicting_groups or key in seen:
+            continue
+        cleaned.append(record)
+        seen.add(key)
+
+    removed_count = len(records) - len(cleaned)
+    return cleaned, removed_count, len(conflicting_groups)
 
 
 def split_grouped_records(
@@ -154,34 +145,38 @@ def split_grouped_records(
     return splits
 
 
-def generate_synthetic_offers(count: int, seed: int = RANDOM_SEED) -> list[dict[str, str]]:
-    variants = [
-        (subject, opening, details, next_step, signoff)
-        for subject in SUBJECTS
-        for opening in OPENINGS
-        for details in DETAILS
-        for next_step in NEXT_STEPS
-        for signoff in SIGNOFFS
-    ]
-    if count > len(variants):
+def load_synthetic_records(path: Path, expected_label: str) -> list[dict[str, str]]:
+    records = load_records(path)
+    invalid_labels = sorted(
+        {record["label"] for record in records if record["label"] != expected_label}
+    )
+    if invalid_labels:
         raise ValueError(
-            f"Requested {count} synthetic examples, but only "
-            f"{len(variants)} template combinations are available"
-        )
-    random.Random(seed).shuffle(variants)
-    records = []
-    for subject, opening, details, next_step, signoff in variants[:count]:
-        records.append(
-            {
-                "subject": subject,
-                "body": (
-                    f"Hello [CANDIDATE],\n\n{opening} {details} "
-                    f"{next_step}\n\n{signoff}"
-                ),
-                "label": "offer",
-            }
+            f"Synthetic examples in {path} must all have label "
+            f"{expected_label!r}; found {invalid_labels}"
         )
     return records
+
+
+def load_synthetic_training_records(
+    source_records: list[dict[str, str]],
+    offer_files: tuple[Path, ...],
+    assessment_file: Path,
+) -> tuple[list[dict[str, str]], int, int]:
+    offers = [
+        record
+        for path in offer_files
+        for record in load_synthetic_records(path, "offer")
+    ]
+    assessments = load_synthetic_records(assessment_file, "assessment")
+    synthetic = offers + assessments
+
+    source_text = {text_key(record) for record in source_records}
+    if any(text_key(record) in source_text for record in synthetic):
+        raise ValueError("A synthetic example duplicates source text")
+    if len({text_key(record) for record in synthetic}) != len(synthetic):
+        raise ValueError("Synthetic example files contain duplicate subject/body text")
+    return synthetic, len(offers), len(assessments)
 
 
 def write_jsonl(path: Path, records: list[dict[str, str]]) -> None:
@@ -190,45 +185,106 @@ def write_jsonl(path: Path, records: list[dict[str, str]]) -> None:
             output.write(json.dumps(record, ensure_ascii=False) + "\n")
 
 
-def main() -> None:
-    parser = argparse.ArgumentParser(
-        description=(
-            "Create deterministic 70/15/15 label-stratified splits, keeping "
-            "identical normalized subject/body text together."
-        )
-    )
-    parser.add_argument(
-        "--synthetic-offers",
-        type=int,
-        default=50,
-        help="Synthetic offer examples to add to training only (default: 50).",
-    )
-    args = parser.parse_args()
-    if args.synthetic_offers < 0:
-        parser.error("--synthetic-offers must be non-negative")
+def analyze_splits(
+    splits: dict[str, list[dict[str, str]]], plot_file: Path
+) -> None:
+    split_data = pd.concat(
+        {
+            split_name: pd.DataFrame.from_records(
+                records, columns=["subject", "body", "label"]
+            )
+            for split_name, records in splits.items()
+        },
+        names=["split", "row"],
+    ).reset_index(level="split")
+    split_data["subject_characters"] = split_data["subject"].str.len()
+    split_data["body_words"] = split_data["body"].str.split().str.len()
 
-    records = load_records(SOURCE_FILE)
+    for split_name, split_records in split_data.groupby("split", sort=False):
+        label_counts = split_records["label"].value_counts().sort_index()
+        label_percentages = (
+            split_records["label"].value_counts(normalize=True).sort_index() * 100
+        )
+        duplicate_count = split_records.duplicated(
+            subset=["subject", "body"]
+        ).sum()
+        empty_subjects = split_records["subject"].str.strip().eq("").sum()
+        empty_bodies = split_records["body"].str.strip().eq("").sum()
+
+        print(f"{split_name.title()} records: {len(split_records)}")
+        print(f"Unique labels: {len(label_counts)}")
+        print("Label distribution:")
+        for label, count in label_counts.items():
+            print(f"  {label}: {count} ({label_percentages[label]:.1f}%)")
+        print(f"Duplicate subject/body records: {duplicate_count}")
+        print(f"Empty subjects: {empty_subjects}")
+        print(f"Empty bodies: {empty_bodies}")
+
+    label_counts_by_split = split_data.groupby(["label", "split"]).size().unstack(
+        fill_value=0
+    )
+    median_lengths = split_data.groupby(["label", "split"])[
+        ["subject_characters", "body_words"]
+    ].median()
+
+    plot_file.parent.mkdir(parents=True, exist_ok=True)
+    figure, axes = plt.subplots(1, 3, figsize=(21, 7))
+    label_counts_by_split.plot(
+        kind="bar", ax=axes[0], title="Examples by category and split"
+    )
+    median_lengths["subject_characters"].unstack().plot(
+        kind="bar", ax=axes[1], title="Median subject length (characters)"
+    )
+    median_lengths["body_words"].unstack().plot(
+        kind="bar", ax=axes[2], title="Median body length (words)"
+    )
+    for axis in axes:
+        axis.set_xlabel("Label")
+        axis.tick_params(axis="x", labelrotation=25)
+        axis.legend(title="Split")
+    axes[0].set_ylabel("Example count")
+    axes[1].set_ylabel("Median characters")
+    axes[2].set_ylabel("Median words")
+    figure.tight_layout()
+    figure.savefig(plot_file, dpi=150)
+    plt.close(figure)
+    print(f"Split analysis visualization: {plot_file.resolve()}")
+
+
+def main() -> None:
+    source_records = load_records(SOURCE_FILE)
+    records, removed_count, conflicting_groups = clean_records(source_records)
     splits = split_grouped_records(records)
     real_split_counts = {split: len(rows) for split, rows in splits.items()}
-    synthetic = generate_synthetic_offers(args.synthetic_offers)
-    existing_text = {text_key(record) for record in records}
-    if any(text_key(record) in existing_text for record in synthetic):
-        raise ValueError("A synthetic example duplicates source email text")
+    synthetic, synthetic_offer_count, synthetic_assessment_count = (
+        load_synthetic_training_records(
+            source_records,
+            SYNTHETIC_OFFER_FILES,
+            SYNTHETIC_ASSESSMENT_FILE,
+        )
+    )
     splits["train"].extend(synthetic)
 
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    write_jsonl(SYNTHETIC_FILE, synthetic)
     for split, path in SPLIT_FILES.items():
         write_jsonl(path, splits[split])
 
-    print(f"Source emails: {len(records)}")
+    print(f"Source records: {len(source_records)}")
+    print(f"Records removed during cleanup: {removed_count}")
+    print(f"Conflicting-label duplicate groups removed: {conflicting_groups}")
+    print(f"Cleaned source records: {len(records)}")
     print(f"Real source split sizes (target 70/15/15): {real_split_counts}")
-    print(f"Synthetic offers added to training only: {len(synthetic)}")
+    print(f"Prebuilt synthetic offers added to training only: {synthetic_offer_count}")
+    print(
+        "Prebuilt synthetic assessments added to training only: "
+        f"{synthetic_assessment_count}"
+    )
     for split, split_records in splits.items():
         print(
             f"{split}: {len(split_records)} records; "
             f"labels: {dict(sorted(Counter(r['label'] for r in split_records).items()))}"
         )
+    analyze_splits(splits, ANALYSIS_PLOT)
     print("Grouping safeguard: exact normalized subject/body matches stay together.")
     print(
         "Thread IDs are unavailable in the source; this does not guarantee "
